@@ -1,0 +1,62 @@
+#!/bin/sh
+
+if [ "$1" = "" ]; then
+	echo "Specify the input text file, dummy\nUSAGE: ottation TEXT_FILE HTML_FILE"
+	exit 0
+fi
+if [ "$2" = "" ]; then
+	echo "Specify where to save the html file, dummy\nUSAGE: ottation TEXT_FILE HTML_FILE"
+	exit 0
+fi
+textOpened=0
+
+while IFS= read -r line; do
+	line=$(echo "$line" | sed 's/	//g')
+	case "$line" in
+		\#*)
+			TITLE=$(echo "$line" | sed 's/^#//g')
+			HEAD="<head>\n	<meta charset=\"utf-8\">\n	<link type=\"text/css\" rel=\"stylesheet\" href=\"CSS/docStyle.css\">\n	<title>$TITLE</title>\n</head>"
+			echo "$HEAD"
+		;;
+		\<\#*)
+			if [ $textOpened = 0 ]; then
+				TEXT=$(echo "$line" | sed 's/^<#//g')
+				echo "$TEXT"
+				textOpened=1
+			fi
+		;;
+		*)
+			if [ $textOpened = 1 ]; then
+				case "$line" in
+					\>-*)
+						preparedLine=$(echo "$line" | sed 's/^>-//g')
+						preparedLine="<h1>$preparedLine</h1>"
+						TEXT=$(echo "$TEXT\n	$preparedLine")
+					;;
+					!-*)
+						preparedLine=$(echo "$line" | sed 's/^!-//g')
+						preparedLine="<h4>$preparedLine</h4>"
+						TEXT=$(echo "$TEXT\n	$preparedLine")
+					;;
+					\>\#*)
+						echo EOF
+					;;
+					x-*)
+						preparedLine=$(echo "$line" | sed 's/^x-//g')
+						preparedLine="<h5><div class=\"list-item\">$preparedLine</div></h5>"
+						TEXT=$(echo "$TEXT\n	$preparedLine")
+					;;
+					*)
+						preparedLine="<h5>$line</h5>"
+						TEXT=$(echo "$TEXT\n	$preparedLine")
+					;;
+				esac
+			fi
+		;;
+	esac
+done < "$1"
+BODY="<body>\n	$TEXT\n	\n</body>"
+echo $BODY
+
+echo "$HEAD" > "$2"
+echo "$BODY" >> "$2"
