@@ -2,9 +2,10 @@
 
 A silly little CLI shell program that makes it possible for me to make simple HTML documents out of my notes.
 
-This is an example, we will call this file example.ott
-
+This is an example, we will call this file example.ott,
 ```
+# USE TAB FOR INDENTATION
+
 !
 ! # <- Title
 ! 
@@ -12,20 +13,20 @@ This is an example, we will call this file example.ott
 ! ! exmple : Comment 2
 ! 
 ! <# <- Start Body
-!    >- <- Header 1
-!    !- <- Question/Whatever
-!    x- <- List item
+!	>- <- Header 1
+!	!- <- Question/Whatever
+!	x- <- List item
 ! ># <- End Body
 !
 
 <#
-    >- Example Title
-        This is some text to show how this works
-        
-    !- Question
-        Answer
-        x- List Item 1
-        x- List Item 2
-        x- Run FreeBSD ;)
+	>- Example Title
+		This is some text to show how this works
+		
+	!- Question
+		Answer
+		x- List Item 1
+    	x- List Item 2
+		x- Run FreeBSD ;)
 >#
 ```
