@@ -1,0 +1,65 @@
+:root {
+	/* Page Styling */
+	--bg-color: #FFFFFF;
+	--page-width: 75vw; /* vw is width of screen in percentage, works for changing page aspect ratio */
+
+	/* Font Color */
+	--font-color: #282828;
+	--header1-font-color: #282828;
+	--header4-font-color: #282828;
+	--list-item-font-color: #282828;
+
+	/* Font Size */
+	--font-size: 1em;
+	--header1-font-size: 2em;
+	--header4-font-size: 1.1em;
+	--list-item-font-size: 1em;
+	
+	/* Font Margin */
+	--font-margin: 5em;
+	--header1-margin: 1em;
+	--header4-margin: 2em;
+	--list-item-margin: 7.1em;
+}
+
+body {
+	background-color: var(--bg-color);
+	color: var(--font-color);
+	max-width: var(--page-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+h4 {
+	color: var(--header4-font-color);
+	margin-left: var(--header4-margin);
+	margin-right: var(--header4-margin);
+	margin-bottom: 0.1em;
+	font-size: var(--header4-font-size);
+}
+
+h1 {
+	color: var(--header1-font-color);
+	margin-left: var(--header1-margin);
+	margin-right: var(--header1-margin);
+	text-decoration: underline;
+	text-align: center;
+	font-size: var(--header1-font-size);
+}
+p {
+	color: var(--font-color);
+	margin-left: var(--font-margin);
+	margin-right: var(--font-margin);
+	margin-bottom: 0.1em;
+	margin-top: 0.1em;
+	font-weight: normal;
+	font-size: var(--font-size);
+}
+
+.list-item {
+	display: list-item;
+	color: var(--list-item-font-color);
+	margin-left: var(--list-item-margin);
+	margin-right: var(--list-item-margin);
+	font-size: var(--list-item-font-size);
+}

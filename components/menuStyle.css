@@ -1,0 +1,48 @@
+:root {
+	--bg-color: #282828;
+	--font-color: #FEFEFE;
+}
+
+body {
+	background-color: var(--bg-color);
+	color: var(--font-color);
+	margin: 0;
+	overflow: hidden;
+}
+
+ul {
+	list-style-type: none;
+}
+
+a {
+	color: var(--font-color);
+	text-decoration: none;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	grid-template-rows: 100vh 100vh;
+	grid-template-areas: "sidebar document";
+}
+
+.sidebar {
+	grid-area: sidebar;
+	padding: 20px;
+}
+
+.document {
+	grid-area: document;
+	height: 100%;
+}
+
+.openDocument {
+	height: 100%;
+	width: 100%;
+	border-right: 0;
+	border-bottom: 0;
+	border-top: 0;
+	border-left: 1;
+	border-width: 5px;
+	border-color: #b8bb26;
+}
