@@ -1,24 +1,36 @@
 #!/bin/sh
 
-if [ "$1" = "" ]; then
-	echo "Specify the input text file, dummy\nUSAGE: ottation TEXT_FILE HTML_FILE"
+if [ "$1" = "" ] || [ "$2" = "" ]; then
+	echo "Specify the input text file, dummy\nUSAGE: ottation TEXT_FILE FILENAME "
 	exit 0
 fi
-if [ "$2" = "" ]; then
-	echo "Specify where to save the html file, dummy\nUSAGE: ottation TEXT_FILE HTML_FILE"
+
+if [ ! -d "$HOME/.config/Ottation" ] || [ ! -f "$HOME/.config/Ottation/docStyle.css" ]; then
+	echo "No ottation config found... creating"
+	mkdir $HOME/.config/Ottation
+	touch $HOME/.config/Ottation/docStyle.css
 	exit 0
 fi
+if [ ! -d "$HOME/.local/share/Ottation" ]; then
+	echo "Ottation database does not exist... creating"
+	mkdir -p $HOME/.local/share/Ottation/documents
+	mkdir $HOME/.local/share/Ottation/style
+	mkdir $HOME/.local/share/Ottation/images
+fi
+
+cp $HOME/.config/Ottation/docStyle.css $HOME/.local/share/Ottation/style/docStyle.css
+
 textOpened=0
 pOpened=0
 
 while IFS= read -r line; do
 	line=$(echo "$line" | sed 's/	//g')
-	if [ $pOpened = 0 ]; then
+	if [ $pOpened = 0 ]; then 
 		if [ $textOpened = 0 ]; then
 			case "$line" in
 				\#*)
 					TITLE=$(echo "$line" | sed 's/^#//g')
-					HEAD="<head>\n	<meta charset=\"utf-8\">\n	<link type=\"text/css\" rel=\"stylesheet\" href=\"CSS/docStyle.css\">\n	<title>$TITLE</title>\n</head>"
+					HEAD="<head>\n	<meta charset=\"utf-8\">\n	<link type=\"text/css\" rel=\"stylesheet\" href=\"../style/docStyle.css\">\n	<title>$TITLE</title>\n</head>"
 					echo "$HEAD"
 				;;
 				\<\#*)
@@ -27,6 +39,9 @@ while IFS= read -r line; do
 						echo "$TEXT"
 						textOpened=1
 					fi
+				;;
+				!*)
+					echo "Ignoring Comment: $(echo "$line" | sed 's/^!//g')"
 				;;
 				*)
 				;;
@@ -44,7 +59,7 @@ while IFS= read -r line; do
 					TEXT=$(echo "$TEXT\n	$preparedLine")
 				;;
 				\>\#*)
-					echo EOF
+
 				;;
 				x-*)
 					preparedLine=$(echo "$line" | sed 's/^x-//g')
@@ -94,5 +109,5 @@ done < "$1"
 BODY="<body>\n	$TEXT\n	\n</body>"
 echo $BODY
 
-echo "$HEAD" > "$2"
-echo "$BODY" >> "$2"
+echo "$HEAD" > "$HOME/.local/share/Ottation/documents/$2"
+echo "$BODY" >> "$HOME/.local/share/Ottation/documents/$2"
