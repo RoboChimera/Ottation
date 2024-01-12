@@ -29,6 +29,7 @@ a {
 .sidebar {
 	grid-area: sidebar;
 	padding: 20px;
+	overflow-y: auto;
 }
 
 .document {
@@ -45,4 +46,5 @@ a {
 	border-left: 1;
 	border-width: 5px;
 	border-color: #b8bb26;
+	overflow: auto;
 }
