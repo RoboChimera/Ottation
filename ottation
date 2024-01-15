@@ -1,9 +1,7 @@
 #!/bin/sh
 
-if [ "$1" = "" ]; then
-	echo "Specify the input text file, dummy\nUSAGE: ottation TEXT_FILE FILENAME"
-	exit 0
-fi
+updateMenu=0
+documentPath="$HOME/.local/share/Ottation"
 
 if [ ! -d "$HOME/.config/Ottation" ]; then
 	echo "No ottation config found... creating"
@@ -12,116 +10,168 @@ if [ ! -d "$HOME/.config/Ottation" ]; then
 	touch $HOME/.config/Ottation/menuStyle.css
 	exit 0
 fi
-if [ ! -d "$HOME/.local/share/Ottation" ]; then
+if [ ! -d "$documentPath" ]; then
 	echo "Ottation database does not exist... creating"
-	mkdir -p $HOME/.local/share/Ottation/documents
-	mkdir $HOME/.local/share/Ottation/style
-	mkdir $HOME/.local/share/Ottation/images
+	mkdir -p $documentPath/documents
+	mkdir $documentPath/style
+	mkdir $documentPath/images
 fi
 
-cp $HOME/.config/Ottation/docStyle.css $HOME/.local/share/Ottation/style/docStyle.css
-cp $HOME/.config/Ottation/menuStyle.css $HOME/.local/share/Ottation/style/menuStyle.css
+cp $HOME/.config/Ottation/docStyle.css $documentPath/style/docStyle.css
+cp $HOME/.config/Ottation/menuStyle.css $documentPath/style/menuStyle.css
 
-if [ ! "$1" = "--create-menu" ]; then
-	textOpened=0
-	pOpened=0
+case "$1" in
+	--create-menu)
+		updateMenu=1
+	;;
+	ls) 
+		updateMenu=1
 
-	while IFS= read -r line; do
-		line=$(echo "$line" | sed 's/	//g')
-		if [ $pOpened = 0 ]; then 
-			if [ $textOpened = 0 ]; then
-				case "$line" in
-					\#*)
-						TITLE=$(echo "$line" | sed 's/^#//g')
-						HEAD="<head>\n	<meta charset=\"utf-8\">\n	<link type=\"text/css\" rel=\"stylesheet\" href=\"../style/docStyle.css\">\n	<title>$TITLE</title>\n</head>"
-						echo "$HEAD"
-					;;
-					\<\#*)
-						if [ $textOpened = 0 ]; then
-							TEXT=$(echo "$line" | sed 's/^<#//g')
-							echo "$TEXT"
-							textOpened=1
-						fi
-					;;
-					!*)
-						echo "Ignoring Comment: $(echo "$line" | sed 's/^!//g')"
-					;;
-					*)
-					;;
-				esac
-			else
-				case "$line" in
-					\>-*)
-						preparedLine=$(echo "$line" | sed 's/^>-//g')
-						preparedLine="<h1>$preparedLine</h1>"
-						TEXT=$(echo "$TEXT\n	$preparedLine")
-					;;
-					!-*)
-						preparedLine=$(echo "$line" | sed 's/^!-//g')
-						preparedLine="<h4>$preparedLine</h4>"
-						TEXT=$(echo "$TEXT\n	$preparedLine")
-					;;
-					\>\#*)
+		echo "Available document(s)..."
+		ls "$documentPath/documents"
+	;;
+	mv) 
+		updateMenu=1
 
-					;;
-					x-*)
-						preparedLine=$(echo "$line" | sed 's/^x-//g')
-						preparedLine="<div class=\"list-item\">$preparedLine</div>"
-						TEXT=$(echo "$TEXT\n	$preparedLine")
-					;;
-					*)
-						if [ $pOpened = 0 ]; then
-							preparedLine="<p>\n		$line"
-							pOpened=1
-						fi
-						TEXT=$(echo "$TEXT\n	$preparedLine")
-					;;
-				esac
-			fi
+		if [ ! "$2" = "" ] | [ ! "$3" = "" ]; then
+			echo "Moving document..."
+			mv "$documentPath/documents/$2" "$documentPath/documents/$3"
 		else
-			case "$line" in
-				\>-*)
-					preparedLine=$(echo "$line" | sed 's/^>-//g')
-					preparedLine="</p>\n	<h1>$preparedLine</h1>"
-					TEXT=$(echo "$TEXT\n	$preparedLine")
-				;;
-				!-*)
-					preparedLine=$(echo "$line" | sed 's/^!-//g')
-					preparedLine="</p>\n	<h4>$preparedLine</h4>"
-					TEXT=$(echo "$TEXT\n	$preparedLine")
-					pOpened=0
-				;;
-				x-*)
-					preparedLine=$(echo "$line" | sed 's/^x-//g')
-					preparedLine="</p>\n	<div class=\"list-item\">$preparedLine</div>"
-					TEXT=$(echo "$TEXT\n	$preparedLine")
-					pOpened=0
-				;;
-				\>\#*)
-					preparedLine=$(echo "$line" | sed 's/^>#//g')
-					preparedLine="</p>\n$preparedLine"
-					TEXT=$(echo "$TEXT\n	$preparedLine")
-					pOpened=0
-				;;
-				*)
-					TEXT=$(echo "$TEXT\n	$line")
-				;;
-			esac
+			echo "USAGE: ottation mv SOURCE TARGET"
+			exit 0
 		fi
-	done < "$1"
-	BODY="<body>\n	$TEXT\n	\n</body>"
-	echo $BODY
+	;;
+	cp)
+		updateMenu=1
 
-	echo "$HEAD" > "$HOME/.local/share/Ottation/documents/$2"
-	echo "$BODY" >> "$HOME/.local/share/Ottation/documents/$2"
+		if [ ! "$2" = "" ] | [ ! "$3" = "" ]; then
+			echo "Copying document..."
+			cp "$documentPath/documents/$2" "$documentPath/documents/$3"
+		else
+			echo "USAGE: ottation cp SOURCE TARGET"
+			exit 0
+		fi
+	;;
+	rm)
+		updateMenu=1
+
+		if [ ! "$2" = "" ]; then
+			echo "Removing document..."
+			rm -v "$documentPath/documents/$2"
+		else
+			echo "USAGE: ottation rm TARGET"
+			exit 0
+		fi
+	;;
+	*)
+		if [ ! "$1" = "" ] | [ ! "$2" = "" ]; then
+			textOpened=0
+			pOpened=0
+			updateMenu=1
+
+			while IFS= read -r line; do
+				line=$(echo "$line" | sed 's/	//g')
+				if [ $pOpened = 0 ]; then 
+					if [ $textOpened = 0 ]; then
+						case "$line" in
+							\#*)
+								TITLE=$(echo "$line" | sed 's/^#//g')
+								HEAD="<head>\n	<meta charset=\"utf-8\">\n	<link type=\"text/css\" rel=\"stylesheet\" href=\"../style/docStyle.css\">\n	<title>$TITLE</title>\n</head>"
+								echo "$HEAD"
+							;;
+							\<\#*)
+								if [ $textOpened = 0 ]; then
+									TEXT=$(echo "$line" | sed 's/^<#//g')
+									echo "$TEXT"
+									textOpened=1
+								fi
+							;;
+							!*)
+								echo "Ignoring Comment: $(echo "$line" | sed 's/^!//g')"
+							;;
+							*)
+							;;
+						esac
+					else
+						case "$line" in
+							\>-*)
+								preparedLine=$(echo "$line" | sed 's/^>-//g')
+								preparedLine="<h1>$preparedLine</h1>"
+								TEXT=$(echo "$TEXT\n	$preparedLine")
+							;;
+							!-*)
+								preparedLine=$(echo "$line" | sed 's/^!-//g')
+								preparedLine="<h4>$preparedLine</h4>"
+								TEXT=$(echo "$TEXT\n	$preparedLine")
+							;;
+							\>\#*)
+
+							;;
+							x-*)
+								preparedLine=$(echo "$line" | sed 's/^x-//g')
+								preparedLine="<div class=\"list-item\">$preparedLine</div>"
+								TEXT=$(echo "$TEXT\n	$preparedLine")
+							;;
+							*)
+								if [ $pOpened = 0 ]; then
+									preparedLine="<p>\n		$line"
+									pOpened=1
+								fi
+								TEXT=$(echo "$TEXT\n	$preparedLine")
+							;;
+						esac
+					fi
+				else
+					case "$line" in
+						\>-*)
+							preparedLine=$(echo "$line" | sed 's/^>-//g')
+							preparedLine="</p>\n	<h1>$preparedLine</h1>"
+							TEXT=$(echo "$TEXT\n	$preparedLine")
+						;;
+						!-*)
+							preparedLine=$(echo "$line" | sed 's/^!-//g')
+							preparedLine="</p>\n	<h4>$preparedLine</h4>"
+							TEXT=$(echo "$TEXT\n	$preparedLine")
+							pOpened=0
+						;;
+						x-*)
+							preparedLine=$(echo "$line" | sed 's/^x-//g')
+							preparedLine="</p>\n	<div class=\"list-item\">$preparedLine</div>"
+							TEXT=$(echo "$TEXT\n	$preparedLine")
+							pOpened=0
+						;;
+						\>\#*)
+							preparedLine=$(echo "$line" | sed 's/^>#//g')
+							preparedLine="</p>\n$preparedLine"
+							TEXT=$(echo "$TEXT\n	$preparedLine")
+							pOpened=0
+						;;
+						*)
+							TEXT=$(echo "$TEXT\n	$line")
+						;;
+					esac
+				fi
+			done < "$1"
+			BODY="<body>\n	$TEXT\n	\n</body>"
+			echo $BODY
+
+			echo "$HEAD" > "$documentPath/documents/$2"
+			echo "$BODY" >> "$documentPath/documents/$2"
+		else
+			echo "Specify the input text file, dummy\nUSAGE: ottation TEXT_FILE FILENAME"
+			exit 0
+		fi
+	;;
+esac
+
+if [ $updateMenu = "1" ]; then
+	MENU="<!DOCTYPE html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<link type=\"text/css\" rel=\"stylesheet\" href=\"style/menuStyle.css\">\n		<title>Ottation</title>\n	</head>\n	<body>\n		<div class=\"grid\">\n			<div class=\"sidebar\">\n				<ul>"
+
+	for file in "$documentPath/documents"/*; do
+		file=$(basename "$file")
+		MENU="$MENU\n					<li class=\"menu-options\"><a href=\"documents/$file\" target=\"document\">$(basename "$file")</a></li>"
+	done
+	MENU="$MENU\n				</ul>\n			</div>\n			<div class=\"document\">\n				<iframe class=\"openDocument\" name=\"document\"></iframe>\n			</div>\n		</div>\n	</body>\n</html>"
+	echo "$MENU"
+	echo "$MENU" > "$documentPath/main.html"
 fi
-
-MENU="<!DOCTYPE html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<link type=\"text/css\" rel=\"stylesheet\" href=\"style/menuStyle.css\">\n		<title>Ottation</title>\n	</head>\n	<body>\n		<div class=\"grid\">\n			<div class=\"sidebar\">\n				<ul>"
-
-for file in "$HOME/.local/share/Ottation/documents"/*; do
-	file=$(basename "$file")
-	MENU="$MENU\n					<li class=\"menu-options\"><a href=\"documents/$file\" target=\"document\">$(basename "$file")</a></li>"
-done
-MENU="$MENU\n				</ul>\n			</div>\n			<div class=\"document\">\n				<iframe class=\"openDocument\" name=\"document\"></iframe>\n			</div>\n		</div>\n	</body>\n</html>"
-echo "$MENU"
-echo "$MENU" > "$HOME/.local/share/Ottation/main.html"
